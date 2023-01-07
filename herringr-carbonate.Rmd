@@ -1,0 +1,68 @@
+---
+title: "herringr-carbonate"
+author: "Kate Morkeski"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setup
+
+Libraries used
+
+```{r}
+
+library(here)
+#library(readxl)
+library(tidyverse)
+
+```
+
+# Read in carbonate data
+
+```{r}
+
+dic <- read_csv(here('DIC_summary.csv')) 
+
+dic$Date <- as.Date(dic$Date, format = "%m/%d/%Y")  
+dic$Treatment <- as.factor(dic$Treatment)
+
+```
+# Organize data
+
+```{r}
+
+dic$month <- format(dic$Date, "%m")
+
+dic_Aug <- dic %>% filter(month == '08')
+
+dic_Aug_5 <- dic_Aug %>% filter(Depth_cm == 5)
+dic_Aug_sand <- dic_Aug %>% filter(Depth_cm == 3)
+
+
+```
+
+# Plot
+
+```{r}
+
+ggplot(dic_Aug_5, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point()
+
+ggplot(dic_Aug_5, aes(Treatment, Salinity_psu)) + geom_col()  
+
+ggplot(dic_Aug_5, aes(Treatment, DIC_umol_kg)) + geom_col()
+
+ggplot(dic_Aug_5, aes(Treatment, Salinity_psu)) + geom_boxplot()  
+
+ggplot(dic_Aug_5, aes(Treatment, DIC_umol_kg)) + geom_boxplot()
+
+#ggplot(dic_Aug_5, aes(Treatment, Salinity_psu)) + geom_col() + geom_errorbar(ymin = min(dic_Aug_5$Salinity_psu), ymax = max(dic_Aug_5$Salinity_psu))
+# x, ymax, ymin, alpha, color, group, linetype, size, width
+
+```
+
+
+
