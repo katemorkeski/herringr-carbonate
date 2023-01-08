@@ -25,42 +25,85 @@ library(tidyverse)
 
 ```{r}
 
-dic <- read_csv(here('DIC_summary.csv')) 
+dic <- read_csv(here('DIC_summary.csv'), show_col_types = FALSE) 
 
 dic$Date <- as.Date(dic$Date, format = "%m/%d/%Y")  
+
 dic$Treatment <- as.factor(dic$Treatment)
 
 ```
+
 # Organize data
 
 ```{r}
 
-dic$month <- format(dic$Date, "%m")
+dic$Sample_ID <- gsub("22-", "", dic$Sample_ID)
+dic$Sample_ID <- as.integer(dic$Sample_ID)
+dic <- dic[order(dic$Sample_ID),]
+
+dic$Month <- format(dic$Date, "%m")
+
+dic <- dic %>% mutate(Spur = case_when(Plot > 7 ~ "creek",
+                                       Plot < 8 ~ "woods"))
 
 dic_Aug <- dic %>% filter(month == '08')
 
 dic_Aug_5 <- dic_Aug %>% filter(Depth_cm == 5)
+dic_Aug_15 <- dic_Aug %>% filter(Depth_cm == 15)
 dic_Aug_sand <- dic_Aug %>% filter(Depth_cm == 3)
 
+dic_15 <- dic %>% filter(Depth_cm == 15)
 
 ```
 
-# Plot
+# Plot 5 cm data
 
 ```{r}
 
-ggplot(dic_Aug_5, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point()
+trt_colors <- c()
 
-ggplot(dic_Aug_5, aes(Treatment, Salinity_psu)) + geom_col()  
+ggplot(dic_Aug_5, aes(Salinity_psu, DIC_umol_kg, color = Spur)) + geom_point(size = 4)
+ggplot(dic_Aug_5, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
 
-ggplot(dic_Aug_5, aes(Treatment, DIC_umol_kg)) + geom_col()
+# these two are plotting sums, need to plot averages
+#ggplot(dic_Aug_5, aes(Treatment, Salinity_psu)) + geom_col()  
+#ggplot(dic_Aug_5, aes(Treatment, DIC_umol_kg)) + geom_col()
 
 ggplot(dic_Aug_5, aes(Treatment, Salinity_psu)) + geom_boxplot()  
 
 ggplot(dic_Aug_5, aes(Treatment, DIC_umol_kg)) + geom_boxplot()
 
+ggplot(dic_Aug_5, aes(Treatment, pH)) + geom_boxplot()
+
 #ggplot(dic_Aug_5, aes(Treatment, Salinity_psu)) + geom_col() + geom_errorbar(ymin = min(dic_Aug_5$Salinity_psu), ymax = max(dic_Aug_5$Salinity_psu))
 # x, ymax, ymin, alpha, color, group, linetype, size, width
+
+```
+Plot sand layer data
+
+```{r}
+
+ggplot(dic_Aug_sand, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
+
+# these two are plotting sums, need to plot averages
+#ggplot(dic_Aug_sand, aes(Treatment, Salinity_psu)) + geom_col()  
+#ggplot(dic_Aug_sand, aes(Treatment, DIC_umol_kg)) + geom_col()
+
+ggplot(dic_Aug_sand, aes(Treatment, Salinity_psu)) + geom_boxplot()  
+
+ggplot(dic_Aug_sand, aes(Treatment, DIC_umol_kg)) + geom_boxplot()
+
+ggplot(dic_Aug_sand, aes(Treatment, pH)) + geom_boxplot()
+
+```
+Plot 15 cm data
+
+```{r}
+
+ggplot(dic_Aug_15, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
+ggplot(dic_15, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point()
+ggplot(dic_15, aes(Salinity_psu, DIC_umol_kg, color = Spur)) + geom_point(size = 4)
+ggplot(dic_15, aes(Salinity_psu, DIC_umol_kg, color = Month)) + geom_point(size = 4)
 
 ```
 
