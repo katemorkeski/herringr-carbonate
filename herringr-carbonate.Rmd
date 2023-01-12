@@ -83,6 +83,8 @@ ggplot(dicta_Aug_5, aes(Treatment, pH)) + geom_boxplot()
 #ggplot(dicta_Aug_5, aes(Treatment, Salinity_psu)) + geom_col() + geom_errorbar(ymin = min(dicta_Aug_5$Salinity_psu), ymax = max(dicta_Aug_5$Salinity_psu))
 # x, ymax, ymin, alpha, color, group, linetype, size, width
 
+ggplot(dicta_Aug_5, aes(TA_umol_kg, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
+
 ```
 Plot sand layer data
 
@@ -98,6 +100,7 @@ ggplot(dicta_Aug_sand, aes(Salinity_psu, TA_umol_kg, color = Treatment)) + geom_
 ggplot(dicta_Aug_sand, aes(Treatment, Salinity_psu)) + geom_boxplot()  
 
 ggplot(dicta_Aug_sand, aes(Treatment, DIC_umol_kg)) + geom_boxplot()
+ggplot(dicta_Aug_sand, aes(Treatment, TA_umol_kg)) + geom_boxplot()
 
 ggplot(dicta_Aug_sand, aes(Treatment, pH)) + geom_boxplot()
 
