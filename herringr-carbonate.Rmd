@@ -25,11 +25,11 @@ library(tidyverse)
 
 ```{r}
 
-dic <- read_csv(here('DIC_summary.csv'), show_col_types = FALSE) 
+dicta <- read_csv(here('herringriv_carbonate_summary.csv'), show_col_types = FALSE) 
 
-dic$Date <- as.Date(dic$Date, format = "%m/%d/%Y")  
+dicta$Date <- as.Date(dicta$Date, format = "%m/%d/%Y")  
 
-dic$Treatment <- as.factor(dic$Treatment)
+dicta$Treatment <- as.factor(dicta$Treatment)
 
 ```
 
@@ -37,22 +37,22 @@ dic$Treatment <- as.factor(dic$Treatment)
 
 ```{r}
 
-dic$Sample_ID <- gsub("22-", "", dic$Sample_ID)
-dic$Sample_ID <- as.integer(dic$Sample_ID)
-dic <- dic[order(dic$Sample_ID),]
+dicta$Sample_ID <- gsub("22-", "", dicta$Sample_ID)
+dicta$Sample_ID <- as.integer(dicta$Sample_ID)
+dicta <- dicta[order(dicta$Sample_ID),]
 
-dic$Month <- format(dic$Date, "%m")
+dicta$Month <- format(dicta$Date, "%m")
 
-dic <- dic %>% mutate(Spur = case_when(Plot > 7 ~ "creek",
+dicta <- dicta %>% mutate(Spur = case_when(Plot > 7 ~ "creek",
                                        Plot < 8 ~ "woods"))
 
-dic_Aug <- dic %>% filter(month == '08')
+dicta_Aug <- dicta %>% filter(Month == '08')
 
-dic_Aug_5 <- dic_Aug %>% filter(Depth_cm == 5)
-dic_Aug_15 <- dic_Aug %>% filter(Depth_cm == 15)
-dic_Aug_sand <- dic_Aug %>% filter(Depth_cm == 3)
+dicta_Aug_5 <- dicta_Aug %>% filter(Depth_cm == 5)
+dicta_Aug_15 <- dicta_Aug %>% filter(Depth_cm == 15)
+dicta_Aug_sand <- dicta_Aug %>% filter(Depth_cm == 3)
 
-dic_15 <- dic %>% filter(Depth_cm == 15)
+dicta_15 <- dicta %>% filter(Depth_cm == 15)
 
 ```
 
@@ -60,22 +60,27 @@ dic_15 <- dic %>% filter(Depth_cm == 15)
 
 ```{r}
 
-trt_colors <- c()
+#trt_colors <- c()
 
-ggplot(dic_Aug_5, aes(Salinity_psu, DIC_umol_kg, color = Spur)) + geom_point(size = 4)
-ggplot(dic_Aug_5, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
+ggplot(dicta_Aug_5, aes(Salinity_psu, DIC_umol_kg, color = Spur)) + geom_point(size = 4)
+ggplot(dicta_Aug_5, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
+
+ggplot(dicta_Aug_5, aes(Salinity_psu, TA_umol_kg, color = Spur)) + geom_point(size = 4)
+ggplot(dicta_Aug_5, aes(Salinity_psu, TA_umol_kg, color = Treatment)) + geom_point(size = 4)
 
 # these two are plotting sums, need to plot averages
-#ggplot(dic_Aug_5, aes(Treatment, Salinity_psu)) + geom_col()  
-#ggplot(dic_Aug_5, aes(Treatment, DIC_umol_kg)) + geom_col()
+#ggplot(dicta_Aug_5, aes(Treatment, Salinity_psu)) + geom_col()  
+#ggplot(dicta_Aug_5, aes(Treatment, dicta_umol_kg)) + geom_col()
 
-ggplot(dic_Aug_5, aes(Treatment, Salinity_psu)) + geom_boxplot()  
+ggplot(dicta_Aug_5, aes(Treatment, Salinity_psu)) + geom_boxplot()  
 
-ggplot(dic_Aug_5, aes(Treatment, DIC_umol_kg)) + geom_boxplot()
+ggplot(dicta_Aug_5, aes(Treatment, DIC_umol_kg)) + geom_boxplot()
 
-ggplot(dic_Aug_5, aes(Treatment, pH)) + geom_boxplot()
+ggplot(dicta_Aug_5, aes(Treatment, TA_umol_kg)) + geom_boxplot()
 
-#ggplot(dic_Aug_5, aes(Treatment, Salinity_psu)) + geom_col() + geom_errorbar(ymin = min(dic_Aug_5$Salinity_psu), ymax = max(dic_Aug_5$Salinity_psu))
+ggplot(dicta_Aug_5, aes(Treatment, pH)) + geom_boxplot()
+
+#ggplot(dicta_Aug_5, aes(Treatment, Salinity_psu)) + geom_col() + geom_errorbar(ymin = min(dicta_Aug_5$Salinity_psu), ymax = max(dicta_Aug_5$Salinity_psu))
 # x, ymax, ymin, alpha, color, group, linetype, size, width
 
 ```
@@ -83,27 +88,33 @@ Plot sand layer data
 
 ```{r}
 
-ggplot(dic_Aug_sand, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
+ggplot(dicta_Aug_sand, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
+ggplot(dicta_Aug_sand, aes(Salinity_psu, TA_umol_kg, color = Treatment)) + geom_point(size = 4)
 
 # these two are plotting sums, need to plot averages
-#ggplot(dic_Aug_sand, aes(Treatment, Salinity_psu)) + geom_col()  
-#ggplot(dic_Aug_sand, aes(Treatment, DIC_umol_kg)) + geom_col()
+#ggplot(dicta_Aug_sand, aes(Treatment, Salinity_psu)) + geom_col()  
+#ggplot(dicta_Aug_sand, aes(Treatment, dicta_umol_kg)) + geom_col()
 
-ggplot(dic_Aug_sand, aes(Treatment, Salinity_psu)) + geom_boxplot()  
+ggplot(dicta_Aug_sand, aes(Treatment, Salinity_psu)) + geom_boxplot()  
 
-ggplot(dic_Aug_sand, aes(Treatment, DIC_umol_kg)) + geom_boxplot()
+ggplot(dicta_Aug_sand, aes(Treatment, DIC_umol_kg)) + geom_boxplot()
 
-ggplot(dic_Aug_sand, aes(Treatment, pH)) + geom_boxplot()
+ggplot(dicta_Aug_sand, aes(Treatment, pH)) + geom_boxplot()
 
 ```
 Plot 15 cm data
 
 ```{r}
 
-ggplot(dic_Aug_15, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
-ggplot(dic_15, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point()
-ggplot(dic_15, aes(Salinity_psu, DIC_umol_kg, color = Spur)) + geom_point(size = 4)
-ggplot(dic_15, aes(Salinity_psu, DIC_umol_kg, color = Month)) + geom_point(size = 4)
+ggplot(dicta_Aug_15, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
+ggplot(dicta_15, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
+ggplot(dicta_15, aes(Salinity_psu, DIC_umol_kg, color = Spur)) + geom_point(size = 4)
+ggplot(dicta_15, aes(Salinity_psu, DIC_umol_kg, color = Month)) + geom_point(size = 4)
+
+ggplot(dicta_Aug_15, aes(Salinity_psu, TA_umol_kg, color = Treatment)) + geom_point(size = 4)
+ggplot(dicta_15, aes(Salinity_psu, TA_umol_kg, color = Treatment)) + geom_point(size = 4)
+ggplot(dicta_15, aes(Salinity_psu, TA_umol_kg, color = Spur)) + geom_point(size = 4)
+ggplot(dicta_15, aes(Salinity_psu, TA_umol_kg, color = Month)) + geom_point(size = 4)
 
 ```
 
