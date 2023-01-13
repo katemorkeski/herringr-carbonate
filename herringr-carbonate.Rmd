@@ -21,7 +21,7 @@ library(tidyverse)
 
 ```
 
-# Read in carbonate data
+Read in carbonate data
 
 ```{r}
 
@@ -30,10 +30,11 @@ dicta <- read_csv(here('herringriv_carbonate_summary.csv'), show_col_types = FAL
 dicta$Date <- as.Date(dicta$Date, format = "%m/%d/%Y")  
 
 dicta$Treatment <- as.factor(dicta$Treatment)
+dicta$Depth_cm <- as.factor(dicta$Depth_cm)
 
 ```
 
-# Organize data
+Organize data
 
 ```{r}
 
@@ -46,6 +47,20 @@ dicta$Month <- format(dicta$Date, "%m")
 dicta <- dicta %>% mutate(Spur = case_when(Plot > 7 ~ "creek",
                                        Plot < 8 ~ "woods"))
 
+```
+Normalize by salinity
+
+```{r}
+#TODO: change placeholder salinity value to actual creek salinity for this date or tide
+dicta <- dicta %>% mutate(DIC_norm = DIC_umol_kg*22/Salinity_psu)
+dicta <- dicta %>% mutate(TA_norm = TA_umol_kg*22/Salinity_psu)
+
+```
+
+Break out data tables by month and depth
+
+```{r}
+
 dicta_Aug <- dicta %>% filter(Month == '08')
 
 dicta_Aug_5 <- dicta_Aug %>% filter(Depth_cm == 5)
@@ -54,72 +69,210 @@ dicta_Aug_sand <- dicta_Aug %>% filter(Depth_cm == 3)
 
 dicta_15 <- dicta %>% filter(Depth_cm == 15)
 
+ggplot(dicta, aes(TA_umol_kg, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)+ labs(title= "All measured DIC and TA by treatment")
+ggplot(dicta, aes(TA_umol_kg, DIC_umol_kg, color = Month)) + geom_point(size = 4) + labs(title= "All measured DIC and TA by month")
+ggplot(dicta, aes(TA_umol_kg, DIC_umol_kg, color = Depth_cm)) + geom_point(size = 4) + labs(title= "All measured DIC and TA by sampling depth")
+
 ```
 
-# Plot 5 cm data
+
+
+
+# Plot August 5 cm data
 
 ```{r}
 
 #trt_colors <- c()
 
-ggplot(dicta_Aug_5, aes(Salinity_psu, DIC_umol_kg, color = Spur)) + geom_point(size = 4)
-ggplot(dicta_Aug_5, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
+ggplot(dicta_Aug_5, aes(Salinity_psu, DIC_umol_kg, color = Spur)) + geom_point(size = 4)+ labs(title = "T5 August 5cm DIC vs salinity, by spur")
+ggplot(dicta_Aug_5, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)+ labs(title = "T5 August 5cm DIC vs salinity, by treatment")
 
-ggplot(dicta_Aug_5, aes(Salinity_psu, TA_umol_kg, color = Spur)) + geom_point(size = 4)
-ggplot(dicta_Aug_5, aes(Salinity_psu, TA_umol_kg, color = Treatment)) + geom_point(size = 4)
+ggplot(dicta_Aug_5, aes(Salinity_psu, TA_umol_kg, color = Spur)) + geom_point(size = 4)+ labs(title = "T5 August 5cm TA vs salinity, by spur")
+ggplot(dicta_Aug_5, aes(Salinity_psu, TA_umol_kg, color = Treatment)) + geom_point(size = 4)+ labs(title = "T5 August 5cm TA vs salinity, by treatment")
 
-# these two are plotting sums, need to plot averages
-#ggplot(dicta_Aug_5, aes(Treatment, Salinity_psu)) + geom_col()  
-#ggplot(dicta_Aug_5, aes(Treatment, dicta_umol_kg)) + geom_col()
+ggplot(dicta_Aug_5, aes(Treatment, Salinity_psu)) + geom_boxplot()  + labs(title = "T5 August 5cm salinity")
 
-ggplot(dicta_Aug_5, aes(Treatment, Salinity_psu)) + geom_boxplot()  
+ggplot(dicta_Aug_5, aes(Treatment, DIC_umol_kg)) + geom_boxplot() + labs(title = "T5 August 5cm DIC")
 
-ggplot(dicta_Aug_5, aes(Treatment, DIC_umol_kg)) + geom_boxplot()
+ggplot(dicta_Aug_5, aes(Treatment, TA_umol_kg)) + geom_boxplot() + labs(title = "T5 August 5cm TA")
 
-ggplot(dicta_Aug_5, aes(Treatment, TA_umol_kg)) + geom_boxplot()
+ggplot(dicta_Aug_5, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T5 August 5cm pH")
 
-ggplot(dicta_Aug_5, aes(Treatment, pH)) + geom_boxplot()
+ggplot(dicta_Aug_5, aes(TA_umol_kg, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)+ labs(title = "T5 August 5cm DIC vs TA")
 
-#ggplot(dicta_Aug_5, aes(Treatment, Salinity_psu)) + geom_col() + geom_errorbar(ymin = min(dicta_Aug_5$Salinity_psu), ymax = max(dicta_Aug_5$Salinity_psu))
-# x, ymax, ymin, alpha, color, group, linetype, size, width
+ggplot(dicta_Aug_5, aes(Treatment, DIC_norm)) + geom_boxplot()+ labs(title = "T5 August 5cm DIC normalized with placeholder salinity = 22 psu")
 
-ggplot(dicta_Aug_5, aes(TA_umol_kg, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
+ggplot(dicta_Aug_5, aes(Treatment, TA_norm)) + geom_boxplot()+ labs(title = "T5 August 5cm TA normalized with placeholder salinity = 22 psu")
+
 
 ```
+Plot normalized DIC and TA without plot 4, which has higher salinity and lower DIC and TA than other quartz plots. 
+
+```{r}
+
+dicta_Aug_5_no_plot_4 <- dicta_Aug_5 %>% filter(Plot != 4)
+
+ggplot(dicta_Aug_5_no_plot_4, aes(Treatment, DIC_norm)) + geom_boxplot()+ labs(title = "T5 August 5cm DIC normalized with placeholder salinity = 22 psu" , subtitle = "excluding quartz plot #4")
+
+ggplot(dicta_Aug_5_no_plot_4, aes(Treatment, TA_norm)) + geom_boxplot()+ labs(title = "T5 August 5cm TA normalized with placeholder salinity = 22 psu" , subtitle = "excluding quartz plot #4")
+
+```
+
+
 Plot sand layer data
 
 ```{r}
 
-ggplot(dicta_Aug_sand, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
-ggplot(dicta_Aug_sand, aes(Salinity_psu, TA_umol_kg, color = Treatment)) + geom_point(size = 4)
+ggplot(dicta_Aug_sand, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)+ labs(title = "T5 August sand layer DIC vs salinity")
+ggplot(dicta_Aug_sand, aes(Salinity_psu, TA_umol_kg, color = Treatment)) + geom_point(size = 4)+ labs(title = "T5 August sand layer TA vs salinity")
 
-# these two are plotting sums, need to plot averages
-#ggplot(dicta_Aug_sand, aes(Treatment, Salinity_psu)) + geom_col()  
-#ggplot(dicta_Aug_sand, aes(Treatment, dicta_umol_kg)) + geom_col()
+ggplot(dicta_Aug_sand, aes(Treatment, Salinity_psu)) + geom_boxplot()  + labs(title = "T5 August sand layer salinity")
 
-ggplot(dicta_Aug_sand, aes(Treatment, Salinity_psu)) + geom_boxplot()  
+ggplot(dicta_Aug_sand, aes(Treatment, DIC_umol_kg)) + geom_boxplot()+ labs(title = "T5 August sand layer DIC")
+ggplot(dicta_Aug_sand, aes(Treatment, TA_umol_kg)) + geom_boxplot()+ labs(title = "T5 August sand layer TA")
 
-ggplot(dicta_Aug_sand, aes(Treatment, DIC_umol_kg)) + geom_boxplot()
-ggplot(dicta_Aug_sand, aes(Treatment, TA_umol_kg)) + geom_boxplot()
-
-ggplot(dicta_Aug_sand, aes(Treatment, pH)) + geom_boxplot()
+ggplot(dicta_Aug_sand, aes(Treatment, pH)) + geom_boxplot()+ labs(title = "T5 August sand layer pH")
 
 ```
-Plot 15 cm data
+# Plot August 15 cm data
 
 ```{r}
 
-ggplot(dicta_Aug_15, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
-ggplot(dicta_15, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)
-ggplot(dicta_15, aes(Salinity_psu, DIC_umol_kg, color = Spur)) + geom_point(size = 4)
-ggplot(dicta_15, aes(Salinity_psu, DIC_umol_kg, color = Month)) + geom_point(size = 4)
+ggplot(dicta_Aug_15, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)+ labs(title = "T5 August 15cm")
+ggplot(dicta_15, aes(Salinity_psu, DIC_umol_kg, color = Treatment)) + geom_point(size = 4)+ labs(title = "All measured 15cm")
+ggplot(dicta_15, aes(Salinity_psu, DIC_umol_kg, color = Spur)) + geom_point(size = 4)+ labs(title = "All measured 15cm")
+ggplot(dicta_15, aes(Salinity_psu, DIC_umol_kg, color = Month)) + geom_point(size = 4)+ labs(title = "All measured 15cm")
 
-ggplot(dicta_Aug_15, aes(Salinity_psu, TA_umol_kg, color = Treatment)) + geom_point(size = 4)
-ggplot(dicta_15, aes(Salinity_psu, TA_umol_kg, color = Treatment)) + geom_point(size = 4)
-ggplot(dicta_15, aes(Salinity_psu, TA_umol_kg, color = Spur)) + geom_point(size = 4)
-ggplot(dicta_15, aes(Salinity_psu, TA_umol_kg, color = Month)) + geom_point(size = 4)
+ggplot(dicta_Aug_15, aes(Salinity_psu, TA_umol_kg, color = Treatment)) + geom_point(size = 4)+ labs(title = "T5 August 15cm")
+ggplot(dicta_15, aes(Salinity_psu, TA_umol_kg, color = Treatment)) + geom_point(size = 4)+ labs(title = "All measured 15cm")
+ggplot(dicta_15, aes(Salinity_psu, TA_umol_kg, color = Spur)) + geom_point(size = 4)+ labs(title = "All measured 15cm")
+ggplot(dicta_15, aes(Salinity_psu, TA_umol_kg, color = Month)) + geom_point(size = 4)+ labs(title = "All measured 15cm")
+
+```
+Read in sensor data
+
+```{r}
+
+sensor <- read_csv(here('porewater_sensor_data.csv'), show_col_types = FALSE) 
+
+sensor$Date <- as.Date(sensor$Date, format = "%m/%d/%Y")  
+
+sensor$Treatment <- as.factor(sensor$Treatment)
+
+sensor$Month <- format(sensor$Date, "%m")
+
+sensor <- sensor %>% mutate(Spur = case_when(Plot > 7 ~ "creek",
+                                       Plot < 8 ~ "woods"))
 
 ```
 
+Create dataframe for each timepoint
 
+```{r}
 
+sensor_T0_5cm <- sensor %>% filter(Timepoint == 'T0' & Tip_Depth_cm == "5")
+sensor_T0_15cm <- sensor %>% filter(Timepoint == 'T0' & Tip_Depth_cm == "15")
+
+sensor_T1_5cm <- sensor %>% filter(Timepoint == 'T1' & Tip_Depth_cm == "5")
+sensor_T1_15cm <- sensor %>% filter(Timepoint == 'T1' & Tip_Depth_cm == "15")
+
+sensor_T2_5cm <- sensor %>% filter(Timepoint == 'T2' & Tip_Depth_cm == "5")
+sensor_T2_15cm <- sensor %>% filter(Timepoint == 'T2' & Tip_Depth_cm == "15")
+
+sensor_T3_5cm <- sensor %>% filter(Timepoint == 'T3' & Tip_Depth_cm == "5")
+sensor_T3_15cm <- sensor %>% filter(Timepoint == 'T3' & Tip_Depth_cm == "15")
+sensor_T3_sand <- sensor %>% filter(Timepoint == 'T3' & Tip_Depth_cm != "5" & Tip_Depth_cm != "15")
+
+sensor_T4_5cm <- sensor %>% filter(Timepoint == 'T4' & Tip_Depth_cm == "5")
+sensor_T4_15cm <- sensor %>% filter(Timepoint == 'T4' & Tip_Depth_cm == "15")
+sensor_T4_sand <- sensor %>% filter(Timepoint == 'T4' & Tip_Depth_cm != "5" & Tip_Depth_cm != "15")
+
+sensor_T5_5cm <- sensor %>% filter(Timepoint == 'T5' & Tip_Depth_cm == "5")
+sensor_T5_15cm <- sensor %>% filter(Timepoint == 'T5' & Tip_Depth_cm == "15")
+sensor_T5_sand <- sensor %>% filter(Timepoint == 'T5' & Tip_Depth_cm != "5" & Tip_Depth_cm != "15")
+
+sensor_T6_5cm <- sensor %>% filter(Timepoint == 'T6' & Tip_Depth_cm == "5")
+sensor_T6_15cm <- sensor %>% filter(Timepoint == 'T6' & Tip_Depth_cm == "15")
+sensor_T6_sand <- sensor %>% filter(Timepoint == 'T6' & Tip_Depth_cm != "5" & Tip_Depth_cm != "15")
+
+# sensor_T1 <- sensor %>% filter(Timepoint == 'T1')
+# sensor_T2 <- sensor %>% filter(Timepoint == 'T2')
+# sensor_T3 <- sensor %>% filter(Timepoint == 'T3')
+# sensor_T4 <- sensor %>% filter(Timepoint == 'T4')
+# sensor_T5 <- sensor %>% filter(Timepoint == 'T5')
+# sensor_T6 <- sensor %>% filter(Timepoint == 'T6')
+
+```
+# Plot sensor data
+
+5 cm salinity
+
+```{r}
+
+ggplot(sensor_T0_5cm, aes(Treatment, sal_psu)) + geom_boxplot() + labs(title = "T0 May 5 cm salinity")
+ggplot(sensor_T1_5cm, aes(Treatment, sal_psu)) + geom_boxplot() + labs(title = "T1 May 5 cm salinity")
+ggplot(sensor_T2_5cm, aes(Treatment, sal_psu)) + geom_boxplot() + labs(title = "T2 May 5 cm salinity")
+ggplot(sensor_T3_5cm, aes(Treatment, sal_psu)) + geom_boxplot() + labs(title = "T3 June 5 cm salinity")
+ggplot(sensor_T4_5cm, aes(Treatment, sal_psu)) + geom_boxplot() + labs(title = "T4 July 5 cm salinity")
+ggplot(sensor_T5_5cm, aes(Treatment, sal_psu)) + geom_boxplot() + labs(title = "T5 August 5 cm salinity")
+ggplot(sensor_T6_5cm, aes(Treatment, sal_psu)) + geom_boxplot() + labs(title = "T6 September 5 cm salinity")
+
+```
+# 5 cm pH
+```{r}
+
+ggplot(sensor_T0_5cm, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T0 May 5 cm pH")
+ggplot(sensor_T1_5cm, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T1 May 5 cm pH")
+ggplot(sensor_T3_5cm, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T2 May 5 cm pH")
+ggplot(sensor_T4_5cm, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T3 June 5 cm pH")
+ggplot(sensor_T5_5cm, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T5 August 5 cm pH")
+ggplot(sensor_T6_5cm, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T6 September 5 cm pH")
+
+```
+Sand salinity
+
+```{r}
+
+ggplot(sensor_T3_sand, aes(Treatment, sal_psu)) + geom_boxplot() + labs(title = "T3 June sand layer salinity")
+ggplot(sensor_T4_sand, aes(Treatment, sal_psu)) + geom_boxplot() + labs(title = "T4 July sand layer salinity")
+ggplot(sensor_T5_sand, aes(Treatment, sal_psu)) + geom_boxplot() + labs(title = "T5 August sand layer salinity")
+ggplot(sensor_T6_sand, aes(Treatment, sal_psu)) + geom_boxplot() + labs(title = "T6 September sand layer salinity")
+
+```
+Sand pH
+
+```{r}
+
+#ggplot(sensor_T3_sand, aes(Treatment, pH)) + geom_boxplot()  # no pH data
+ggplot(sensor_T4_sand, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T4 July sand layer pH")
+ggplot(sensor_T5_sand, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T5 August sand layer pH")
+ggplot(sensor_T6_sand, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T6 September sand layer pH")
+
+```
+15 cm salinity
+
+```{r}
+
+ggplot(sensor_T0_15cm, aes(Treatment, sal_psu)) + geom_boxplot()+ labs(title = "T0 May 15 cm salinity")
+ggplot(sensor_T1_15cm, aes(Treatment, sal_psu)) + geom_boxplot()+ labs(title = "T1 May 15 cm salinity")
+ggplot(sensor_T2_15cm, aes(Treatment, sal_psu)) + geom_boxplot()+ labs(title = "T2 May 15 cm  salinity")
+ggplot(sensor_T3_15cm, aes(Treatment, sal_psu)) + geom_boxplot()+ labs(title = "T3 June 15 cm salinity")
+ggplot(sensor_T4_15cm, aes(Treatment, sal_psu)) + geom_boxplot()+ labs(title = "T4 July 15 cm salinity")
+ggplot(sensor_T5_15cm, aes(Treatment, sal_psu)) + geom_boxplot()+ labs(title = "T5 August 15 cm salinity")
+ggplot(sensor_T6_15cm, aes(Treatment, sal_psu)) + geom_boxplot()+ labs(title = "T6 September 15 cm salinity")
+
+```
+
+15 cm pH
+
+```{r}
+
+ggplot(sensor_T0_15cm, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T0 May 15 cm pH")
+ggplot(sensor_T1_15cm, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T1 May 15 cm pH")
+ggplot(sensor_T2_15cm, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T2 May 15 cm pH")
+ggplot(sensor_T3_15cm, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T3 June 15 cm pH")
+ggplot(sensor_T4_15cm, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T4 July 15 cm pH")
+ggplot(sensor_T5_15cm, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T5 August 15 cm pH")
+ggplot(sensor_T6_15cm, aes(Treatment, pH)) + geom_boxplot() + labs(title = "T6 September 15 cm pH")
+
+```
